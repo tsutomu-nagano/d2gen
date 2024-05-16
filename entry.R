@@ -7,8 +7,19 @@ library(tidyr)
 library(readxl)
 library(openxlsx)
 library(readr)
+library(argparse)
 
-c(
+parser <- ArgumentParser(description='Example of argparse')
+
+# 引数の追加
+parser$add_argument("--src", type="character")
+parser$add_argument("--dest", type="character")
+parser$add_argument("--rec", type="integer", default = 100)
+parser$add_argument("--dtype", type="character", default = "variable")
+args <- parser$parse_args()
+
+
+ss <- c(
     list.files("R/common", full.names = TRUE),
     list.files("R", full.names = TRUE)
 ) %>%
@@ -20,10 +31,14 @@ purrr::map(function(src){
 })
 
 
-src <- "test/【オンサイト用】（標準記法）令和2年国調個別データCP_2020_RCD_Kobetsu-kk_B(基本集計).xlsx"
+src <- args$src
+dest <- args$dest
+rec <- args$rec
+dtype <- args$dtype
+
 std <- StandardCodeTable$new(src)
 
 dd <- DummyDataGen$new(std$items, std$codelist)
 
-dd$generate(rec = 100, dest = "hoge.csv", datatype = "variable")
+dd$generate(rec = rec, dest = dest, datatype = dtype)
 

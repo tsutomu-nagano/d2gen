@@ -2,7 +2,7 @@ version: "3.8"
 services:
   dev:
     build:
-      context: .
+      context: ../
       dockerfile: Dockerfile
     image: d2gen
     container_name: d2gen
@@ -11,5 +11,10 @@ services:
     tty: true
 
     volumes:
-      - .:/workspaces
+      - ..:/home/d2gen
+
+    working_dir: /home/d2gen
+
+    entrypoint: "/bin/bash"
+
 
