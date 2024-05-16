@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: d2gen
+    container_name: d2gen
+
+    stdin_open: true
+    tty: true
+
+    volumes:
+      - .:/workspaces
+
