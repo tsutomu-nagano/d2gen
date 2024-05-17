@@ -24,7 +24,8 @@
 ```shell
 git clone git@github.com:tsutomu-nagano/d2gen.git
 cd d2gen
+docker build . -t d2gen:latest
 src=test/【オンサイト用】（標準記法）令和2年国調個別データCP_2020_RCD_Kobetsu-kk_B(基本集計).xlsx
 dest=test.csv
-docker run --rm -v $PWD:/home/d2gen d2gen --src "${src}" --dest "${dest}" --rec 5
+docker run --rm -v $PWD:/home/d2gen d2gen:latest --src "${src}" --dest "${dest}" --rec 5
 ```
