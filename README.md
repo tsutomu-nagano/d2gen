@@ -25,7 +25,7 @@
 - miripoからダウンロードできる令和２年の国勢調査の符号表からダミーデータを作成する例です
 - 符号表は事前にtestディレクトリにダウンロードしているものを使っています
 
-```shell
+``` sh
 git clone git@github.com:tsutomu-nagano/d2gen.git
 cd d2gen
 docker build . -t d2gen:latest
