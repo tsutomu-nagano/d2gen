@@ -25,11 +25,11 @@
 - miripoからダウンロードできる令和２年の国勢調査の符号表からダミーデータを作成する例です
 - 符号表は事前にtestディレクトリにダウンロードしているものを使っています
 
-```shell-session
-$ git clone git@github.com:tsutomu-nagano/d2gen.git
-$ cd d2gen
-$ docker build . -t d2gen:latest
-$ src=test/【オンサイト用】（標準記法）令和2年国調個別データCP_2020_RCD_Kobetsu-kk_B(基本集計).xlsx
-$ dest=test.csv
-$ docker run --rm -v $PWD:/home/d2gen d2gen:latest --src "${src}" --dest "${dest}" --rec 5
+```sh
+git clone git@github.com:tsutomu-nagano/d2gen.git
+cd d2gen
+docker build . -t d2gen:latest
+src=test/【オンサイト用】（標準記法）令和2年国調個別データCP_2020_RCD_Kobetsu-kk_B(基本集計).xlsx
+dest=test.csv
+docker run --rm -v $PWD:/home/d2gen d2gen:latest --src "${src}" --dest "${dest}" --rec 5
 ```
