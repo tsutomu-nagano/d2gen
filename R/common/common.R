@@ -127,3 +127,9 @@ get_stem <- function(path){
     return(str_match(basename(path), "(.+)\\..+")[1,2])
 
 }
+
+get_ext <- function(path){
+
+    return(str_match(basename(path), ".+\\.(.+)")[1,2])
+
+}

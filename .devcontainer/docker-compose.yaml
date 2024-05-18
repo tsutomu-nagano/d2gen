@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: Dockerfile
     image: d2gen
-    container_name: d2gen
+    container_name: d2gen-dev
 
     stdin_open: true
     tty: true

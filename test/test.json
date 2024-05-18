@@ -1,0 +1,11 @@
+{
+    "info":{
+        "datatype": "variable",
+        "delim": "\t"
+    },
+    "items":[
+        {"id":1, "pos":1, "length":1, "code":["A","B","C"]},
+        {"id":2, "pos":2, "length":2, "code":["01--99","VV"]},
+        {"id":3, "pos":4, "length":3, "code":["1～999"]}
+    ]
+}

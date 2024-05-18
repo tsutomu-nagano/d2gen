@@ -1,5 +1,5 @@
 
-library(dplyr)
+library(dplyr, warn.conflicts=F)
 library(stringr)
 library(glue)
 library(R6)
@@ -8,6 +8,8 @@ library(readxl)
 library(openxlsx)
 library(readr)
 library(argparse)
+library(yaml)
+
 
 parser <- ArgumentParser(description='Example of argparse')
 
@@ -34,11 +36,25 @@ purrr::map(function(src){
 src <- args$src
 dest <- args$dest
 rec <- args$rec
-dtype <- args$dtype
 
-std <- StandardCodeTable$new(src)
 
-dd <- DummyDataGen$new(std$items, std$codelist)
+if (str_detect(get_ext(src), regex("xlsx", ignore_case = TRUE))){
+    std <- StandardCodeTable$new(src)
+    dtype <- std$info$datatype
+    delim <- str$info$delim
+    dd <- DummyDataGen$new(std$items, std$codelist)
+}
 
-dd$generate(rec = rec, dest = dest, datatype = dtype)
+if (str_detect(get_ext(src), regex("json", ignore_case = TRUE))){
+    json <- read_yaml(src)
+    dtype <- json$info$datatype
+    delim <- json$info$delim
+
+    base <- tibble(json$items) %>% unnest_wider(everything())
+    items <- base %>% distinct(id, pos, length) %>% mutate(across(everything(), ~as.character(.x)))
+    codelist <- base %>% select(id, code) %>% unnest(code) %>% mutate(across(everything(), ~as.character(.x)))
+    dd <- DummyDataGen$new(items, codelist)
+}
+
+dd$generate(rec = rec, dest = dest, datatype = dtype, delim = delim)
 

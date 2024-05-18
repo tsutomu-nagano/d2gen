@@ -3,14 +3,16 @@ DummyDataGen <- R6Class("dummydatagen",
 
         items = NULL,
         codelist = NULL,
+
         initialize = function(items, codelist) {
 
             self$items <- items
             self$codelist <- codelist
 
+
         },
 
-        generate = function(rec, dest, datatype = "variable", err_rate = 0, random_chars = c(letters, LETTERS, as.character(0:9))){
+        generate = function(rec, dest, datatype = "variable", delim = ",", err_rate = 0, random_chars = c(letters, LETTERS, as.character(0:9))){
 
             rnd_char <- function(size){
 
@@ -55,7 +57,6 @@ DummyDataGen <- R6Class("dummydatagen",
 
 
             if (datatype == "variable"){
-                delim <- ","
                 base <- self$items %>% mutate(pos = id, length = 0)
             } else {
                 delim <- ""
@@ -84,7 +85,7 @@ DummyDataGen <- R6Class("dummydatagen",
             select(pos, codes) %>%
             pivot_wider(names_from = "pos", values_from = "codes") %>%
             unnest(cols = everything()) %>%
-            write_delim(dest, delim = delim, col_names = FALSE)
+            write_delim(dest, delim = delim, col_names = FALSE, )
 
 
             # base %>%
