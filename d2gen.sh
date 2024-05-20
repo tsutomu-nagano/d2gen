@@ -5,4 +5,4 @@ docker build . -t d2gen:latest
 src="test/test.json"
 dest="test1.csv"
 
-docker run --rm -v $PWD:/home/d2gen d2gen --src "${src}" --dest "${dest}" --rec 50
+docker run --rm -v $PWD:/home/d2gen d2gen --src "${src}" --dest "${dest}" --rec 50 --chunk 30

@@ -9,7 +9,7 @@ library(openxlsx)
 library(readr)
 library(argparse)
 library(yaml)
-
+library(cli)
 
 parser <- ArgumentParser(description='Example of argparse')
 
@@ -17,7 +17,7 @@ parser <- ArgumentParser(description='Example of argparse')
 parser$add_argument("--src", type="character")
 parser$add_argument("--dest", type="character")
 parser$add_argument("--rec", type="integer", default = 100)
-parser$add_argument("--dtype", type="character", default = "variable")
+parser$add_argument("--chunk", type="integer", default = 0)
 args <- parser$parse_args()
 
 
@@ -36,6 +36,7 @@ purrr::map(function(src){
 src <- args$src
 dest <- args$dest
 rec <- args$rec
+chunk <- args$chunk
 
 
 if (str_detect(get_ext(src), regex("xlsx", ignore_case = TRUE))){
@@ -56,5 +57,5 @@ if (str_detect(get_ext(src), regex("json", ignore_case = TRUE))){
     dd <- DummyDataGen$new(items, codelist)
 }
 
-dd$generate(rec = rec, dest = dest, datatype = dtype, delim = delim)
+dd$generate(rec = rec, dest = dest, datatype = dtype, delim = delim, chunk = chunk)
 

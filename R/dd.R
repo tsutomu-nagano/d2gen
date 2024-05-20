@@ -12,7 +12,7 @@ DummyDataGen <- R6Class("dummydatagen",
 
         },
 
-        generate = function(rec, dest, datatype = "variable", delim = ",", err_rate = 0, random_chars = c(letters, LETTERS, as.character(0:9))){
+        generate = function(rec, dest, datatype = "variable", delim = ",", chunk = 0, err_rate = 0, random_chars = c(letters, LETTERS, as.character(0:9))){
 
             rnd_char <- function(size){
 
@@ -56,6 +56,7 @@ DummyDataGen <- R6Class("dummydatagen",
             }
 
 
+
             if (datatype == "variable"){
                 base <- self$items %>% mutate(pos = id, length = 0)
             } else {
@@ -67,25 +68,61 @@ DummyDataGen <- R6Class("dummydatagen",
                      mutate(code = str_replace_all(code, "△", " "))
 
 
-            base %>%
+
+
+            dummybase <- base %>%
             left_join(codes, by = "id", multiple = "all") %>%
             mutate(pos = as.integer(pos), length = as.integer(length)) %>%
             mutate(code = if_else(id == "", rnd_char(length), code)) %>%
-            nest(codes = code) %>%
-            mutate(codes = purrr::pmap(
-                list(codes, length),
-                function(codes, length){
-                codes %>%
-                pull(code) %>%
-                purrr::map2(.x = .,.y = rec, .f = to_array) %>% unlist %>%
-                sample(size = rec, replace = TRUE) %>%
-                str_pad(width = length)
-            })) %>%
-            arrange(pos) %>%
-            select(pos, codes) %>%
-            pivot_wider(names_from = "pos", values_from = "codes") %>%
-            unnest(cols = everything()) %>%
-            write_delim(dest, delim = delim, col_names = FALSE, )
+            nest(codes = code)
+
+
+            if (chunk == 0){
+
+                chunk <- rec
+                chunks <- c(rec)
+
+            } else {
+                remainder <- rec %% chunk
+                quotient <- rec %/% chunk
+
+                chunks <- rep(chunk, quotient)
+
+                if (remainder != 0){
+                    chunks <- c(chunks, rec - max(chunks))
+                }
+            }
+
+            cli_alert_info("rec_total = {rec}, chunk = {chunk}, loops = {length(chunks)}")
+
+
+            for(index in 1:length(chunks)){
+
+                rec_ <- chunks[index]
+
+
+
+                dummybase %>%
+                mutate(codes = purrr::pmap(
+                    list(codes, length),
+                    function(codes, length){
+                    codes %>%
+                    pull(code) %>%
+                    purrr::map2(.x = .,.y = rec_, .f = to_array) %>% unlist %>%
+                    sample(size = rec_, replace = TRUE) %>%
+                    str_pad(width = length)
+                })) %>%
+                arrange(pos) %>%
+                select(pos, codes) %>%
+                pivot_wider(names_from = "pos", values_from = "codes") %>%
+                unnest(cols = everything()) %>%
+                write_delim(dest, delim = delim, col_names = FALSE, append = (index != 1))
+
+                cli_alert_success("loop = {index}, rec = {rec_}")
+
+
+            }
+
 
 
             # base %>%
