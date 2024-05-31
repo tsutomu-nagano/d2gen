@@ -56,7 +56,6 @@ DummyDataGen <- R6Class("dummydatagen",
             }
 
 
-
             if (datatype == "variable"){
                 base <- self$items %>% mutate(pos = id, length = 0)
             } else {
@@ -66,8 +65,6 @@ DummyDataGen <- R6Class("dummydatagen",
             codes <- self$codelist %>%
                      select(id, code) %>%
                      mutate(code = str_replace_all(code, "△", " "))
-
-
 
 
             dummybase <- base %>%
@@ -100,17 +97,15 @@ DummyDataGen <- R6Class("dummydatagen",
 
                 rec_ <- chunks[index]
 
-
-
                 dummybase %>%
                 mutate(codes = purrr::pmap(
                     list(codes, length),
                     function(codes, length){
-                    codes %>%
-                    pull(code) %>%
-                    purrr::map2(.x = .,.y = rec_, .f = to_array) %>% unlist %>%
-                    sample(size = rec_, replace = TRUE) %>%
-                    str_pad(width = length)
+                        codes %>%
+                        pull(code) %>%
+                        purrr::map2(.x = .,.y = rec_, .f = to_array) %>% unlist %>%
+                        sample(size = rec_, replace = TRUE) %>%
+                        str_pad(width = length)
                 })) %>%
                 arrange(pos) %>%
                 select(pos, codes) %>%

@@ -46,9 +46,9 @@ StandardCodeList <- R6Class("standardcodelist",
             )
 
 
-            cells %>%
-            filter(data_type != "character") %>%
-            print(n = "all")
+            # cells %>%
+            # filter(data_type != "character") %>%
+            # print(n = "all")
 
 
             self$info <- cells %>%
@@ -124,17 +124,15 @@ StandardCodeTable <- R6Class("standardcodetable",
 
             df <- read_excel(src, skip = 7, col_type = "text")
 
-
-
             if (any(names(df) == "位置")){
                 self$info$datatype <- "fixed"
+                self$info$delim <- ""
                 key <- "pos"
             } else {
                 self$info$datatype <- "variable"
+                self$info$delim <- ","
                 key <- "itemno"
             }
-
-
 
             renames_base <- tribble(
                 ~name.ja,   ~name,

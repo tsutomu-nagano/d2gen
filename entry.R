@@ -42,8 +42,9 @@ chunk <- args$chunk
 if (str_detect(get_ext(src), regex("xlsx", ignore_case = TRUE))){
     std <- StandardCodeTable$new(src)
     dtype <- std$info$datatype
-    delim <- str$info$delim
+    delim <- std$info$delim
     dd <- DummyDataGen$new(std$items, std$codelist)
+
 }
 
 if (str_detect(get_ext(src), regex("json", ignore_case = TRUE))){
