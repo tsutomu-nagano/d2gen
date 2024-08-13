@@ -1,0 +1,15 @@
+{
+    "name": "d2gen dev",
+    "dockerComposeFile": "./compose.yaml",
+    "service": "dev",
+    "workspaceFolder": "/home/d2gen",
+    "customizations": {
+        "vscode": {
+          "extensions": [
+            "MS-CEINTL.vscode-language-pack-ja",
+            "mhutchie.git-graph",
+            "REditorSupport.r"
+        ]
+        }
+      }
+}
