@@ -1,3 +1,4 @@
+
 DummyDataGen <- R6Class("dummydatagen",
     public = list(
 
@@ -14,15 +15,6 @@ DummyDataGen <- R6Class("dummydatagen",
 
         generate = function(rec, dest, datatype = "variable", delim = ",", chunk = 0, err_rate = 0, random_chars = c(letters, LETTERS, as.character(0:9))){
 
-            rnd_char <- function(size){
-
-                size %>%
-                purrr::map(function(size){
-                    str_c(sample(random_chars, size = size, replace =TRUE), collapse = "")
-                }) %>%
-                unlist
-
-            }
 
             to_array <- function(x, size){
 
@@ -69,8 +61,8 @@ DummyDataGen <- R6Class("dummydatagen",
 
             dummybase <- base %>%
             left_join(codes, by = "id", multiple = "all") %>%
-            mutate(pos = as.integer(pos), length = as.integer(length)) %>%
-            mutate(code = if_else(id == "", rnd_char(length), code)) %>%
+            mutate(pos = as.integer(pos), length = as.integer(length), is_codelist = (id != "")) %>%
+            mutate(code = if_else(is_codelist, code, rnd_char(length, random_chars))) %>%
             nest(codes = code)
 
 
@@ -99,12 +91,16 @@ DummyDataGen <- R6Class("dummydatagen",
 
                 dummybase %>%
                 mutate(codes = purrr::pmap(
-                    list(codes, length),
-                    function(codes, length){
+                    list(codes, is_codelist, length),
+                    function(codes, is_codelist, length){
                         codes %>%
                         pull(code) %>%
                         purrr::map2(.x = .,.y = rec_, .f = to_array) %>% unlist %>%
-                        sample(size = rec_, replace = TRUE) %>%
+                        sample_with_err(
+                            size = rec_,
+                            is_codelist = is_codelist,
+                            usable_chars = random_chars,
+                            err_rate = err_rate) %>%
                         str_pad(width = length)
                 })) %>%
                 arrange(pos) %>%

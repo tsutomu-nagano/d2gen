@@ -5,4 +5,4 @@ dest="test.csv"
 # src="test/test.json"
 # dest="test1.csv"
 
-docker run --rm -v $PWD:/home/d2gen d2gen --src "${src}" --dest "${dest}" --rec 5000 --chunk 0
+docker run --rm -v $PWD:/home/d2gen d2gen --src "${src}" --dest "${dest}" --rec 10 --chunk 0 --err 0.2
