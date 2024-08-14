@@ -21,7 +21,7 @@ read_csv_text <- function(path, ...){
 }
 
 
-statlist <- read_csv_text("data/common/statlist.csv")
+# statlist <- read_csv_text("data/common/statlist.csv")
 
 
 MicroCodeList <- R6Class("microcodelist",
