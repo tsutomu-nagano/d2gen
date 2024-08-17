@@ -152,7 +152,7 @@ sample_with_err <- function(x, size, is_codelist, usable_chars, err_rate = 0){
     if (is_codelist){
 
         if (err_rate == 0){
-            ret <- sample(x, size, replace)
+            ret <- sample(x, size, replace = TRUE)
 
         } else {
 
@@ -162,17 +162,7 @@ sample_with_err <- function(x, size, is_codelist, usable_chars, err_rate = 0){
             length_ <- str_length(x)
             size_ <- sample(min(length_):max(length_), size = size, replace = TRUE)
 
-
-            # # print(x)
-            # # print(size_)
-
-            # # print(length)
-            # # print(size)
-            # # print(rep(length, size))
             err_x <- rnd_char(size_, usable_chars)
-
-            # print(x)
-            # print(err_x)
 
             ret <- sample(c(
                     sample(x, size, replace = TRUE),
