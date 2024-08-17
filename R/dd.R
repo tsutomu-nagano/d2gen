@@ -4,16 +4,40 @@ DummyDataGen <- R6Class("dummydatagen",
 
         items = NULL,
         codelist = NULL,
+        dtype = "variable",
+        delim = ",",
 
-        initialize = function(items, codelist) {
+        initialize = function(seed = NA) {
 
-            self$items <- items
-            self$codelist <- codelist
+            # self$items <- items
+            # self$codelist <- codelist
 
 
         },
 
-        generate = function(rec, dest, datatype = "variable", delim = ",", chunk = 0, err_rate = 0, random_chars = c(letters, LETTERS, as.character(0:9))){
+        setting_from_std = function(src){
+
+            std <- StandardCodeTable$new(src)
+            self$dtype <- std$info$datatype
+            self$delim <- std$info$delim
+            self$items <- std$items 
+            self$codelist <- std$codelist
+
+        },
+
+        setting_from_json = function(src){
+
+            json <- read_yaml(src)
+            self$dtype <- json$info$datatype
+            self$delim <- json$info$delim
+
+            base <- tibble(json$items) %>% unnest_wider(everything())
+            self$items <- base %>% distinct(id, pos, length) %>% mutate(across(everything(), ~as.character(.x)))
+            self$codelist <- base %>% select(id, code) %>% unnest(code) %>% mutate(across(everything(), ~as.character(.x)))
+
+        },
+
+        generate = function(rec, dest, datatype = self$dtype, delim = self$delim, chunk = 0, err_rate = 0, random_chars = c(letters, LETTERS, as.character(0:9))){
 
 
             to_array <- function(x, size){

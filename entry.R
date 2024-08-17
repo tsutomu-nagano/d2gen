@@ -42,24 +42,20 @@ chunk <- args$chunk
 err_rate <- args$err
 
 
+dd <- DummyDataGen$new()
+
+
 if (str_detect(get_ext(src), regex("xlsx", ignore_case = TRUE))){
-    std <- StandardCodeTable$new(src)
-    dtype <- std$info$datatype
-    delim <- std$info$delim
-    dd <- DummyDataGen$new(std$items, std$codelist)
+
+    dd$setting_from_std(src)
 
 }
 
 if (str_detect(get_ext(src), regex("json", ignore_case = TRUE))){
-    json <- read_yaml(src)
-    dtype <- json$info$datatype
-    delim <- json$info$delim
 
-    base <- tibble(json$items) %>% unnest_wider(everything())
-    items <- base %>% distinct(id, pos, length) %>% mutate(across(everything(), ~as.character(.x)))
-    codelist <- base %>% select(id, code) %>% unnest(code) %>% mutate(across(everything(), ~as.character(.x)))
-    dd <- DummyDataGen$new(items, codelist)
+    dd$setting_from_json(src)
+
 }
 
-dd$generate(rec = rec, dest = dest, datatype = dtype, delim = delim, chunk = chunk, err_rate = err_rate)
+dd$generate(rec = rec, dest = dest, chunk = chunk, err_rate = err_rate)
 
