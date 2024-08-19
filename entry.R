@@ -19,6 +19,7 @@ parser$add_argument("--dest", type="character")
 parser$add_argument("--rec", type="integer", default = 100)
 parser$add_argument("--chunk", type="integer", default = 0)
 parser$add_argument("--err", type="double", default = 0)
+parser$add_argument("--report",  action="store_true", default=FALSE)
 
 args <- parser$parse_args()
 
@@ -40,7 +41,7 @@ dest <- args$dest
 rec <- args$rec
 chunk <- args$chunk
 err_rate <- args$err
-
+output_report <- args$report
 
 dd <- DummyDataGen$new()
 
@@ -57,5 +58,4 @@ if (str_detect(get_ext(src), regex("json", ignore_case = TRUE))){
 
 }
 
-dd$generate(rec = rec, dest = dest, chunk = chunk, err_rate = err_rate)
-
+dd$generate(rec = rec, dest = dest, chunk = chunk, err_rate = err_rate, output_report = output_report)

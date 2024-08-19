@@ -7,7 +7,7 @@ DummyDataGen <- R6Class("dummydatagen",
         dtype = "variable",
         delim = ",",
 
-        initialize = function(seed = NA) {
+        initialize = function() {
 
             # self$items <- items
             # self$codelist <- codelist
@@ -37,7 +37,17 @@ DummyDataGen <- R6Class("dummydatagen",
 
         },
 
-        generate = function(rec, dest, datatype = self$dtype, delim = self$delim, chunk = 0, err_rate = 0, random_chars = c(letters, LETTERS, as.character(0:9))){
+
+        generate = function(
+            rec, 
+            dest, 
+            datatype = self$dtype, 
+            delim = self$delim, 
+            chunk = 0, 
+            err_rate = 0, 
+            random_chars = c(letters, LETTERS, as.character(0:9)),
+            output_report = FALSE
+            ){
 
 
             to_array <- function(x, size){
@@ -135,6 +145,24 @@ DummyDataGen <- R6Class("dummydatagen",
 
                 cli_alert_success("loop = {index}, rec = {rec_}")
 
+
+            }
+
+
+            if (output_report){
+
+                report.dest <- str_replace(dest, "(.+)(\\..+?)$", "\\1_report.html")
+
+                descriptions <- list(
+                    "source" = src,
+                    "destination" = dest,
+                    "record" = rec,
+                    "err.rate" = err_rate,
+                    "filetype" = datatype,
+                    "delimitter" = delim
+                )
+
+                create_report(descriptions, report.dest)
 
             }
 
