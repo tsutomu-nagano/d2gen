@@ -49,7 +49,7 @@ cd d2gen
 docker build . -t d2gen:latest
 export src="test/【オンサイト用】（標準記法）令和2年国調個別データCP_2020_RCD_Kobetsu-kk_B(基本集計).xlsx"
 export dest="test.csv"
-docker run --rm -v $PWD:/home/d2gen d2gen:latest --src "${src}" --dest "${dest}" --rec 10 --err 0.2
+docker run --rm -v $PWD:/home/d2gen d2gen:latest --src "${src}" --dest "${dest}" --rec 10 --err 0.2 --report
 ```
 
 ### パラメータの説明
@@ -61,3 +61,5 @@ docker run --rm -v $PWD:/home/d2gen d2gen:latest --src "${src}" --dest "${dest}"
 | --rec | 出力レコード数 | | 100 |
 | --chunk | チャンクサイズ（ここで指定したレコード数ごとに出力処理される） | | 0（分割出力しない） |
 | --err | 注入するエラーレコードの割合（`code`の定義がある場合のみエラーレコードが注入されます） | | 0（エラーレコードを注入しない） |
+| --report | HTML形式の処理結果レポートを出力する | | FALSE（オプションがあった場合にTRUE） |
+
