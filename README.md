@@ -66,4 +66,10 @@ docker run --rm -v $PWD:/home/d2gen d2gen:latest --src "${src}" --dest "${dest}"
 | --report | HTML形式の処理結果レポートを出力する | | FALSE（オプションがあった場合にTRUE） |
 
 ## 🧑‍💻 for devloper
-- 
+- dev containerを起動して開発をする
+- テストは以下コマンドでテスト可能です
+
+```shll
+R
+> testthat::test_dir("tests/testthat")
+```
