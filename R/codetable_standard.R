@@ -134,46 +134,79 @@ StandardCodeTable <- R6Class("standardcodetable",
                 key <- "itemno"
             }
 
+
+
+            base <- df %>% setNames(str_replace_all(names(.), "\r\n","")) 
+
+
             renames_base <- tribble(
                 ~name.ja,   ~name,
-                "位置", "pos",
+                "位置",     "pos",
+                "項目名",   "itemname",
                 "バイト数", "length",
                 "項目番号", "itemno",
-                "符号", "code",
+                "符号",     "code",
+                "階層",     "lv",
                 "符号内容", "content",
-            )
+            ) %>%
+            filter(name.ja %in% names(base))
 
-            renames <- renames_base %>% pull(name.ja)
-            names(renames) <- renames_base %>% pull(name)
+            renames <- renames_base %>% pull(name.ja)   
+            names(renames) <- renames_base %>% pull(name) 
 
-            base <- df %>%
-                        setNames(str_replace_all(names(.), "\r\n","")) %>%
-                        purrr::reduce2(
-                            .init = .,
-                            .x = renames_base %>% pull(name.ja),
-                            .y = renames_base %>% pull(name),
-                            .f = function(df, name.ja, name){
 
-                                ns <- names(df)
-                                
-                                if (any(ns == name.ja)){
-                                    ns <- str_replace(ns, glue("^{name.ja}$"), name)
-                                    df <- df %>% setNames(ns)
-                                }
+            temp <- base %>%
+            rename(renames) %>%
+            select(one_of(renames_base$name)) %>%
+            mutate(lv = as.integer(replace_na(lv, "0")))
 
-                                return(df)
-                            }
-                        ) %>%
-                        select(one_of(renames_base$name)) %>%
-                        mutate(key = !!as.name(key)) %>%
-                        mutate(code = if_else(!is.na(key),replace_na(code, "") , code)) %>%
-                        filter(!is.na(content)) %>%
-                        fill(-c(code, content)) %>%
-                        select(-key) %>%
-                        mutate(code = replace_na(code, "")) %>%
-                        rename(id = itemno) %>%
-                        mutate(num = dplyr::row_number())
+            lv.max <- temp %>% filter(!is.na(lv)) %>% pull(lv) %>% as.integer %>% max
+
             
+            self$items <- 1:lv.max %>%
+                            purrr::reduce(
+                                .init = temp,
+                                .x = .,
+                                .f = function(df, lv_){
+
+                                    lv_name <- as.character(glue("lv{lv_}"))
+                                    df %>%
+                                    mutate(
+                                        !!lv_name := case_when(
+                                        lv == 0   ~ "",
+                                        lv == lv_ ~ itemname,
+                                        lv < lv_  ~ "",
+                                        TRUE      ~ as.character(NA)
+                                        )
+                                    ) %>%
+                                    return
+
+                                }
+                            ) %>%
+                            filter(lv != 0) %>%
+                            fill(starts_with("lv")) %>%
+                            select(-lv) %>%
+                            unite(itemnames, starts_with("lv"), sep = "_", remove = FALSE) %>%
+                            mutate(itemnames = str_replace_all(itemnames, "[_]+", "_")) %>%
+                            mutate(itemnames = str_replace(itemnames, "[_]+$", "")) %>%
+                            mutate(key = !!as.name(key)) %>%
+                            filter(!is.na(key)) %>%
+                            select(-c(code,content,key)) %>%
+                            relocate(itemno)
+
+
+            base <- base %>%
+                    rename(renames) %>%
+                    select(one_of(renames_base$name)) %>%
+                    mutate(key = !!as.name(key)) %>%
+                    mutate(code = if_else(!is.na(key),replace_na(code, "") , code)) %>%
+                    filter(!is.na(content)) %>%
+                    fill(-c(code, content)) %>%
+                    select(-key) %>%
+                    mutate(code = replace_na(code, "")) %>%
+                    mutate(num = dplyr::row_number()) %>%
+                    relocate(itemno)
+        
 
             refs <- base %>% filter(code == "外部参照")
 
@@ -201,8 +234,6 @@ StandardCodeTable <- R6Class("standardcodetable",
 
             }
 
-           
-            self$items <- base %>% distinct(id)
 
             self$codelist <- base
             # self$items <- self$items %>%

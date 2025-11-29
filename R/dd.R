@@ -15,6 +15,29 @@ DummyDataGen <- R6Class("dummydatagen",
 
         },
 
+
+        setting_from_excel = function(src){
+
+            std <- StandardCodeTable$new(src)
+            self$dtype <- std$info$datatype
+            self$delim <- std$info$delim
+            self$items <- std$items 
+            self$codelist <- std$codelist
+
+        },
+
+
+        setting_from_micro = function(src){
+
+            std <- StandardCodeTable$new(src)
+            self$dtype <- std$info$datatype
+            self$delim <- std$info$delim
+            self$items <- std$items 
+            self$codelist <- std$codelist
+
+        },
+
+
         setting_from_std = function(src){
 
             std <- StandardCodeTable$new(src)

@@ -1,28 +1,4 @@
 
-get_ext <- function(path){
-
-    return(str_match(basename(path), ".+\\.(.+)")[1,2])
-
-}
-
-
-read_csv_text <- function(path, ...){
-
-    if (get_ext(path) == "csv"){
-        df <- read_csv(path, col_types = cols(.default = "c"), ...)
-    }
-
-    if (get_ext(path) == "parquet"){
-        df <- read_parquet(path)
-    }
-
-    return(df)
-
-}
-
-
-# statlist <- read_csv_text("data/common/statlist.csv")
-
 
 MicroCodeList <- R6Class("microcodelist",
     public = list(
@@ -45,13 +21,8 @@ MicroCodeList <- R6Class("microcodelist",
                 "B4",       "note",
             )
 
-
-            cells %>%
-            filter(data_type != "character") %>%
-            print(n = "all")
-
-
             self$info <- cells %>%
+            filter(sheet != "検索項目") %>%
             inner_join(infopos, by = "address", multiple = "all") %>%
             select(sheet, name, character)
 
@@ -71,9 +42,8 @@ MicroCodeList <- R6Class("microcodelist",
             rename(value = character) %>%
             pivot_wider(id_cols = c(sheet, row)) %>%
             arrange(sheet,row) %>%
-            select(-row)
-
-
+            select(-row) %>%
+            rename(id = sheet)
 
         }
     )
@@ -99,7 +69,7 @@ MicroCodeTable <- R6Class("microcodetable",
         info = NULL,
         items = NULL,
         source = NULL,
-        codelists = NULL,
+        codelist = NULL,
         region = NULL,
         time_s = NULL,
         time_e = NULL,
@@ -107,7 +77,6 @@ MicroCodeTable <- R6Class("microcodetable",
 
 		initialize = function(src) {
 
-            print(src)
             log_info(glue("dataset {basename(src)} init"))
 
             self$source <- src 
@@ -130,33 +99,14 @@ MicroCodeTable <- R6Class("microcodetable",
                     excel2list(src, "個票データの項目（事項名）")
 
             self$statcode <- self$info$statcode
-            is_statcode_offcode <- (statlist %>% filter(statcode == self$statcode) %>% nrow == 0)
 
             # 実施年から時間軸抽出
             self$info$time_s <- era2y(self$info$surveydate)
             self$info$time_e <- era2y(self$info$surveydate)
 
-            # 時間軸未抽出の場合のメッセージを設定
-            if (is.na(self$info$time_s)) {
-                private$add_message(
-                    lv = "w",
-                    msg = c(
-                        "実施時期から時間軸を抽出できなかったため時間軸が設定されていないためこのままでは登録できません",
-                        "実施時期（D2セル）に値を設定して再作成するか、作成されたデータセットの定義に時間軸を設定してください。"
-                        )
-                    )
-            }
 
-            # 統計コードのオフコードのメッセー時を設定
-            if (is_statcode_offcode) {
-                private$add_message(
-                    lv = "d",
-                    msg = c(
-                        "政府統計コードがオフコードのためこのままでは登録できません",
-                        "政府統計コード（B1セル）を確認して再作成してください。"
-                        )
-                    )
-            }
+            base <- read_excel(src, col_types = "text", skip = 7, sheet = "個票データの項目（事項名）") %>%
+                    setNames(str_replace_all(names(.), "\r\n",""))
 
             renames_base <- tribble(
                 ~name.ja,   ~name,
@@ -170,29 +120,16 @@ MicroCodeTable <- R6Class("microcodetable",
                 "種別", "kind",
                 "変数名", "var",
                 "対象", "target",
-            )
+            ) %>%
+            filter(name.ja %in% names(base))
 
             renames <- renames_base %>% pull(name.ja)
             names(renames) <- renames_base %>% pull(name)
 
-            self$items <- read_excel(src, col_types = "text", skip = 7, sheet = "個票データの項目（事項名）") %>%
-                        setNames(str_replace_all(names(.), "\r\n","")) %>%
-                        purrr::reduce2(
-                            .init = .,
-                            .x = renames_base %>% pull(name.ja),
-                            .y = renames_base %>% pull(name),
-                            .f = function(df, name.ja, name){
 
-                                ns <- names(df)
-                                
-                                if (any(ns == name.ja)){
-                                    ns <- str_replace(ns, glue("^{name.ja}$"), name)
-                                    df <- df %>% setNames(ns)
-                                }
-
-                                return(df)
-                            }
-                        )
+            self$items <- base %>%
+                          rename(renames) %>%
+                          select(one_of(renames_base$name))
             
 
             self$items <- self$items %>%
@@ -207,6 +144,7 @@ MicroCodeTable <- R6Class("microcodetable",
             self$info$itemcount <- as.character(nrow(self$items))
 
             if (self$info$datatype == "固定長"){
+                self$info$datatype <- "fixed"
                 self$info$recordlength <- self$items %>%
                                              pull(length) %>%
                                              str_trim %>%
@@ -215,10 +153,15 @@ MicroCodeTable <- R6Class("microcodetable",
                                              sum %>%
                                              as.character
             } else {
+                self$info$datatype <- "variable"
+                self$info$delim <- ","
                 self$info$recordlength <- ""
             }
 
-            self$codelists <- MicroCodeList$new(src)
+            codelist <- MicroCodeList$new(src)
+
+
+            self$codelist <- codelist$items
             # ids <- self$items %>% filter(!is.na(id)) %>% pull(id) %>% unique
             # prog_id <- cli_progress_bar("二次メタ様式から事項の情報を読み取り中", total = length(ids), type = "tasks")
             # self$codelists <- purrr::map(.x = ids, .f = function(id){

@@ -1,9 +1,10 @@
-FROM rocker/tidyverse:4
+FROM rocker/tidyverse:4.2.2
 
 RUN install2.r --error --deps TRUE \
         tidyxl \
         argparse \
-        DT
+        DT \
+        logger
 
 COPY R/ /home/d2gen/R/
 COPY entry.R /home/d2gen/entry.R
