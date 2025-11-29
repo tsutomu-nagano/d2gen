@@ -17,7 +17,6 @@ library(tidyxl)
 
 test.dir <- here::here("tests")
 
-script_dir <- dirname(rstudioapi::getSourceEditorContext()$path)  # RStudio の場合
 r_files <- list.files(here::here("R") , full.names = TRUE, recursive = TRUE)
 purrr::walk(r_files, ~ if (!file.info(.x)$isdir) source(.x))
 
