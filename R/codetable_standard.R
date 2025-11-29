@@ -156,7 +156,7 @@ StandardCodeTable <- R6Class("standardcodetable",
 
 
             temp <- base %>%
-            rename(renames) %>%
+            rename(!!!renames) %>%
             select(one_of(renames_base$name)) %>%
             mutate(lv = as.integer(replace_na(lv, "0")))
 
@@ -196,7 +196,7 @@ StandardCodeTable <- R6Class("standardcodetable",
 
 
             base <- base %>%
-                    rename(renames) %>%
+                    rename(!!!renames) %>%
                     select(one_of(renames_base$name)) %>%
                     mutate(key = !!as.name(key)) %>%
                     mutate(code = if_else(!is.na(key),replace_na(code, "") , code)) %>%

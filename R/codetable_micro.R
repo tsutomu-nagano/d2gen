@@ -128,7 +128,7 @@ MicroCodeTable <- R6Class("microcodetable",
 
 
             self$items <- base %>%
-                          rename(renames) %>%
+                          rename(!!!renames) %>%
                           select(one_of(renames_base$name))
             
 
